@@ -1,0 +1,73 @@
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+
+rule_files:
+  # - "first_rules.yml"
+  # - "second_rules.yml"
+
+scrape_configs:
+  # Prometheus itself
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']
+
+  # API Gateway
+  - job_name: 'api-gateway'
+    static_configs:
+      - targets: ['host.docker.internal:3001']
+    metrics_path: '/metrics'
+    scrape_interval: 30s
+
+  # Identity Service
+  - job_name: 'identity-service'
+    static_configs:
+      - targets: ['host.docker.internal:3010']
+    metrics_path: '/metrics'
+    scrape_interval: 30s
+
+  # Tenant Service
+  - job_name: 'tenant-service'
+    static_configs:
+      - targets: ['host.docker.internal:3011']
+    metrics_path: '/metrics'
+    scrape_interval: 30s
+
+  # Billing Service
+  - job_name: 'billing-service'
+    static_configs:
+      - targets: ['host.docker.internal:3012']
+    metrics_path: '/metrics'
+    scrape_interval: 30s
+
+  # Notification Service
+  - job_name: 'notification-service'
+    static_configs:
+      - targets: ['host.docker.internal:3013']
+    metrics_path: '/metrics'
+    scrape_interval: 30s
+
+  # Reporting Service
+  - job_name: 'reporting-service'
+    static_configs:
+      - targets: ['host.docker.internal:3014']
+    metrics_path: '/metrics'
+    scrape_interval: 30s
+
+  # PostgreSQL Exporter (if needed)
+  - job_name: 'postgres'
+    static_configs:
+      - targets: ['postgres:5432']
+    scrape_interval: 60s
+
+  # Redis Exporter (if needed)
+  - job_name: 'redis'
+    static_configs:
+      - targets: ['redis:6379']
+    scrape_interval: 60s
+
+  # Node Exporter (if needed)
+  - job_name: 'node'
+    static_configs:
+      - targets: ['host.docker.internal:9100']
+    scrape_interval: 60s

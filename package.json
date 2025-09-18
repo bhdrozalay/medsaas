@@ -22,9 +22,13 @@
     "changeset": "changeset",
     "version-packages": "changeset version",
     "release": "changeset publish",
-    "docker:dev": "docker-compose --profile dev up -d",
+    "docker:core": "docker-compose --profile core up -d",
+    "docker:dev": "docker-compose --profile core --profile monitoring up -d",
     "docker:full": "docker-compose --profile full up -d",
     "docker:down": "docker-compose down",
+    "docker:clean": "docker-compose down -v --remove-orphans",
+    "docker:logs": "docker-compose logs -f",
+    "docker:status": "docker-compose ps",
     "setup": "npm install && npm run build"
   },
   "devDependencies": {
