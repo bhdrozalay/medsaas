@@ -1,0 +1,47 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    "allowJs": true,
+    "skipLibCheck": true,
+    "strict": true,
+    "forceConsistentCasingInFileNames": true,
+    "noEmit": true,
+    "esModuleInterop": true,
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "jsx": "preserve",
+    "incremental": true,
+    "plugins": [
+      {
+        "name": "next"
+      }
+    ],
+    "baseUrl": ".",
+    "paths": {
+      "@medsas/types": ["./packages/types/src"],
+      "@medsas/ui": ["./packages/ui/src"],
+      "@medsas/auth-sdk": ["./packages/auth-sdk/src"],
+      "@medsas/database": ["./packages/database/src"],
+      "@medsas/config": ["./packages/config/src"],
+      "@medsas/utils": ["./packages/utils/src"],
+      "@medsas/policy": ["./packages/policy/src"],
+      "@medsas/telemetry": ["./packages/telemetry/src"],
+      "@medsas/audit-logger": ["./packages/audit-logger/src"]
+    }
+  },
+  "include": [
+    "next-env.d.ts",
+    "**/*.ts",
+    "**/*.tsx",
+    ".next/types/**/*.ts"
+  ],
+  "exclude": [
+    "node_modules",
+    "dist",
+    "build",
+    ".next"
+  ]
+}
