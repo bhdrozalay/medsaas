@@ -1,0 +1,514 @@
+// MedSAS - Enterprise Multi-Tenant Database Schema
+// This is the unified schema that all services will reference
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/client"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ==============================================
+// ENUMS
+// ==============================================
+
+enum UserRole {
+  SUPER_ADMIN
+  TENANT_ADMIN
+  TENANT_USER
+}
+
+enum UserStatus {
+  ACTIVE
+  INACTIVE
+  SUSPENDED
+  PENDING_VERIFICATION
+}
+
+enum TenantStatus {
+  ACTIVE
+  SUSPENDED
+  CANCELLED
+  TRIAL
+}
+
+enum SubscriptionPlan {
+  FREE
+  BASIC
+  PROFESSIONAL
+  ENTERPRISE
+}
+
+enum SubscriptionStatus {
+  ACTIVE
+  CANCELLED
+  PAST_DUE
+  UNPAID
+  TRIALING
+}
+
+enum PaymentStatus {
+  PENDING
+  COMPLETED
+  FAILED
+  REFUNDED
+  CANCELLED
+}
+
+enum InvoiceStatus {
+  DRAFT
+  PENDING
+  PAID
+  OVERDUE
+  CANCELLED
+}
+
+enum NotificationType {
+  EMAIL
+  PUSH
+  SMS
+  IN_APP
+}
+
+enum NotificationStatus {
+  PENDING
+  SENT
+  DELIVERED
+  FAILED
+  READ
+}
+
+enum AuditAction {
+  CREATE
+  UPDATE
+  DELETE
+  LOGIN
+  LOGOUT
+  EXPORT
+  IMPORT
+}
+
+enum AuditResource {
+  USER
+  TENANT
+  SUBSCRIPTION
+  INVOICE
+  NOTIFICATION
+  REPORT
+}
+
+// ==============================================
+// CORE ENTITIES
+// ==============================================
+
+// Base model for all entities
+model BaseEntity {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("base_entities")
+}
+
+// ==============================================
+// TENANT MANAGEMENT DOMAIN
+// ==============================================
+
+model Tenant {
+  id          String        @id @default(cuid())
+  name        String
+  slug        String        @unique
+  domain      String?       @unique
+  status      TenantStatus  @default(ACTIVE)
+  plan        SubscriptionPlan @default(FREE)
+  settings    Json          @default("{}")
+  limits      Json          @default("{}")
+  createdAt   DateTime      @default(now()) @map("created_at")
+  updatedAt   DateTime      @updatedAt @map("updated_at")
+
+  // Relations
+  users         User[]
+  subscriptions Subscription[]
+  invoices      Invoice[]
+  notifications Notification[]
+  auditLogs     AuditLog[]
+  reports       Report[]
+  apiKeys       ApiKey[]
+
+  @@map("tenants")
+}
+
+// ==============================================
+// IDENTITY & ACCESS DOMAIN
+// ==============================================
+
+model User {
+  id                String     @id @default(cuid())
+  email             String     @unique
+  passwordHash      String     @map("password_hash")
+  firstName         String     @map("first_name")
+  lastName          String     @map("last_name")
+  avatar            String?
+  role              UserRole
+  status            UserStatus @default(PENDING_VERIFICATION)
+  emailVerifiedAt   DateTime?  @map("email_verified_at")
+  lastLoginAt       DateTime?  @map("last_login_at")
+  preferences       Json       @default("{}")
+  profile           Json       @default("{}")
+  createdAt         DateTime   @default(now()) @map("created_at")
+  updatedAt         DateTime   @updatedAt @map("updated_at")
+
+  // Multi-tenant relation
+  tenantId String? @map("tenant_id")
+  tenant   Tenant? @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  // Relations
+  sessions           Session[]
+  passwordResets     PasswordReset[]
+  twoFactorAuth      TwoFactorAuth[]
+  notifications      Notification[]
+  auditLogs          AuditLog[]
+  createdReports     Report[] @relation("ReportCreator")
+  apiKeys            ApiKey[]
+
+  @@map("users")
+}
+
+model Session {
+  id        String   @id @default(cuid())
+  token     String   @unique
+  userId    String   @map("user_id")
+  ipAddress String   @map("ip_address")
+  userAgent String   @map("user_agent")
+  expiresAt DateTime @map("expires_at")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  // Relations
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("sessions")
+}
+
+model PasswordReset {
+  id        String   @id @default(cuid())
+  userId    String   @map("user_id")
+  token     String   @unique
+  expiresAt DateTime @map("expires_at")
+  usedAt    DateTime? @map("used_at")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  // Relations
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("password_resets")
+}
+
+model TwoFactorAuth {
+  id        String   @id @default(cuid())
+  userId    String   @unique @map("user_id")
+  secret    String
+  backupCodes Json   @map("backup_codes")
+  isEnabled Boolean  @default(false) @map("is_enabled")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("two_factor_auth")
+}
+
+model Permission {
+  id          String @id @default(cuid())
+  name        String @unique
+  resource    String
+  action      String
+  conditions  Json?  @default("{}")
+  description String?
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  rolePermissions RolePermission[]
+
+  @@map("permissions")
+}
+
+model Role {
+  id          String @id @default(cuid())
+  name        String @unique
+  description String?
+  isSystem    Boolean @default(false) @map("is_system")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  rolePermissions RolePermission[]
+
+  @@map("roles")
+}
+
+model RolePermission {
+  roleId       String @map("role_id")
+  permissionId String @map("permission_id")
+
+  // Relations
+  role       Role       @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  permission Permission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
+
+  @@id([roleId, permissionId])
+  @@map("role_permissions")
+}
+
+// ==============================================
+// BILLING & SUBSCRIPTION DOMAIN
+// ==============================================
+
+model Subscription {
+  id                  String             @id @default(cuid())
+  tenantId            String             @map("tenant_id")
+  plan                SubscriptionPlan
+  status              SubscriptionStatus @default(TRIALING)
+  customerId          String?            @map("customer_id")
+  subscriptionId      String?            @unique @map("subscription_id")
+  currentPeriodStart  DateTime           @map("current_period_start")
+  currentPeriodEnd    DateTime           @map("current_period_end")
+  cancelAtPeriodEnd   Boolean            @default(false) @map("cancel_at_period_end")
+  trialEnd            DateTime?          @map("trial_end")
+  metadata            Json               @default("{}")
+  createdAt           DateTime           @default(now()) @map("created_at")
+  updatedAt           DateTime           @updatedAt @map("updated_at")
+
+  // Relations
+  tenant   Tenant    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  invoices Invoice[]
+  payments Payment[]
+
+  @@map("subscriptions")
+}
+
+model Invoice {
+  id             String        @id @default(cuid())
+  tenantId       String        @map("tenant_id")
+  subscriptionId String?       @map("subscription_id")
+  number         String        @unique
+  status         InvoiceStatus @default(DRAFT)
+  subtotal       Int           // in cents
+  tax            Int           @default(0) // in cents
+  total          Int           // in cents
+  currency       String        @default("USD")
+  dueDate        DateTime      @map("due_date")
+  paidAt         DateTime?     @map("paid_at")
+  metadata       Json          @default("{}")
+  createdAt      DateTime      @default(now()) @map("created_at")
+  updatedAt      DateTime      @updatedAt @map("updated_at")
+
+  // Relations
+  tenant       Tenant        @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  subscription Subscription? @relation(fields: [subscriptionId], references: [id])
+  items        InvoiceItem[]
+  payments     Payment[]
+
+  @@map("invoices")
+}
+
+model InvoiceItem {
+  id          String @id @default(cuid())
+  invoiceId   String @map("invoice_id")
+  description String
+  quantity    Int
+  unitPrice   Int    @map("unit_price") // in cents
+  amount      Int    // in cents
+  metadata    Json   @default("{}")
+
+  // Relations
+  invoice Invoice @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+
+  @@map("invoice_items")
+}
+
+model Payment {
+  id             String        @id @default(cuid())
+  invoiceId      String        @map("invoice_id")
+  subscriptionId String?       @map("subscription_id")
+  paymentId      String?       @unique @map("payment_id")
+  amount         Int           // in cents
+  currency       String        @default("USD")
+  status         PaymentStatus @default(PENDING)
+  paymentMethod  String        @map("payment_method")
+  metadata       Json          @default("{}")
+  createdAt      DateTime      @default(now()) @map("created_at")
+  updatedAt      DateTime      @updatedAt @map("updated_at")
+
+  // Relations
+  invoice      Invoice       @relation(fields: [invoiceId], references: [id])
+  subscription Subscription? @relation(fields: [subscriptionId], references: [id])
+
+  @@map("payments")
+}
+
+// ==============================================
+// NOTIFICATION DOMAIN
+// ==============================================
+
+model Notification {
+  id         String             @id @default(cuid())
+  tenantId   String?            @map("tenant_id")
+  userId     String?            @map("user_id")
+  type       NotificationType
+  status     NotificationStatus @default(PENDING)
+  title      String
+  content    String
+  metadata   Json               @default("{}")
+  scheduledAt DateTime?         @map("scheduled_at")
+  sentAt     DateTime?          @map("sent_at")
+  readAt     DateTime?          @map("read_at")
+  createdAt  DateTime           @default(now()) @map("created_at")
+  updatedAt  DateTime           @updatedAt @map("updated_at")
+
+  // Relations
+  tenant Tenant? @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  user   User?   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("notifications")
+}
+
+model NotificationTemplate {
+  id          String           @id @default(cuid())
+  name        String           @unique
+  type        NotificationType
+  subject     String?
+  content     String
+  variables   Json             @default("[]")
+  isActive    Boolean          @default(true) @map("is_active")
+  metadata    Json             @default("{}")
+  createdAt   DateTime         @default(now()) @map("created_at")
+  updatedAt   DateTime         @updatedAt @map("updated_at")
+
+  @@map("notification_templates")
+}
+
+// ==============================================
+// REPORTING & ANALYTICS DOMAIN
+// ==============================================
+
+model Report {
+  id          String   @id @default(cuid())
+  tenantId    String?  @map("tenant_id")
+  createdById String   @map("created_by_id")
+  name        String
+  description String?
+  query       Json
+  parameters  Json     @default("{}")
+  schedule    Json?    @default("{}")
+  isActive    Boolean  @default(true) @map("is_active")
+  metadata    Json     @default("{}")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  tenant       Tenant?          @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  createdBy    User             @relation("ReportCreator", fields: [createdById], references: [id])
+  executions   ReportExecution[]
+
+  @@map("reports")
+}
+
+model ReportExecution {
+  id         String    @id @default(cuid())
+  reportId   String    @map("report_id")
+  status     String    @default("PENDING")
+  result     Json?
+  error      String?
+  executedAt DateTime? @map("executed_at")
+  createdAt  DateTime  @default(now()) @map("created_at")
+
+  // Relations
+  report Report @relation(fields: [reportId], references: [id], onDelete: Cascade)
+
+  @@map("report_executions")
+}
+
+// ==============================================
+// AUDIT & SECURITY DOMAIN
+// ==============================================
+
+model AuditLog {
+  id         String        @id @default(cuid())
+  tenantId   String?       @map("tenant_id")
+  userId     String?       @map("user_id")
+  action     AuditAction
+  resource   AuditResource
+  resourceId String?       @map("resource_id")
+  oldValues  Json?         @map("old_values")
+  newValues  Json?         @map("new_values")
+  ipAddress  String        @map("ip_address")
+  userAgent  String        @map("user_agent")
+  metadata   Json          @default("{}")
+  createdAt  DateTime      @default(now()) @map("created_at")
+
+  // Relations
+  tenant Tenant? @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  user   User?   @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@map("audit_logs")
+}
+
+model ApiKey {
+  id          String   @id @default(cuid())
+  tenantId    String?  @map("tenant_id")
+  userId      String   @map("user_id")
+  name        String
+  keyHash     String   @unique @map("key_hash")
+  permissions Json     @default("[]")
+  lastUsedAt  DateTime? @map("last_used_at")
+  expiresAt   DateTime? @map("expires_at")
+  isActive    Boolean  @default(true) @map("is_active")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  tenant Tenant? @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  user   User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("api_keys")
+}
+
+// ==============================================
+// FILE STORAGE DOMAIN
+// ==============================================
+
+model File {
+  id          String   @id @default(cuid())
+  tenantId    String?  @map("tenant_id")
+  userId      String?  @map("user_id")
+  filename    String
+  originalName String  @map("original_name")
+  mimetype    String
+  size        Int
+  path        String
+  url         String?
+  metadata    Json     @default("{}")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  @@map("files")
+}
+
+// ==============================================
+// SYSTEM CONFIGURATION
+// ==============================================
+
+model SystemConfig {
+  id        String   @id @default(cuid())
+  key       String   @unique
+  value     Json
+  isPublic  Boolean  @default(false) @map("is_public")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("system_configs")
+}
