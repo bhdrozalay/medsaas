@@ -1,0 +1,44 @@
+{
+  "name": "@medsas/web",
+  "version": "0.1.0",
+  "private": true,
+  "description": "MedSAS Web Application - Patient portal and healthcare management",
+  "scripts": {
+    "dev": "next dev -p 3001",
+    "build": "next build",
+    "start": "next start -p 3001",
+    "lint": "eslint",
+    "type-check": "tsc --noEmit",
+    "clean": "rm -rf .next"
+  },
+  "dependencies": {
+    "@hookform/resolvers": "^3.3.2",
+    "@medsas/utils": "file:../../packages/utils",
+    "@prisma/client": "^5.22.0",
+    "axios": "^1.6.0",
+    "clsx": "^2.0.0",
+    "express-rate-limit": "^7.4.1",
+    "js-cookie": "^3.0.5",
+    "lucide-react": "^0.292.0",
+    "next": "^14.2.5",
+    "qrcode": "^1.5.3",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "react-hook-form": "^7.47.0",
+    "react-hot-toast": "^2.4.1",
+    "zod": "^3.22.4"
+  },
+  "devDependencies": {
+    "@types/js-cookie": "^3.0.6",
+    "@types/node": "^20.8.7",
+    "@types/qrcode": "^1.5.2",
+    "@types/react": "^18.2.31",
+    "@types/react-dom": "^18.2.14",
+    "autoprefixer": "^10.4.21",
+    "eslint": "^8.51.0",
+    "eslint-config-next": "^14.0.1",
+    "postcss": "^8.5.6",
+    "tailwindcss": "^3.4.17",
+    "typescript": "^5.2.2"
+  }
+}
