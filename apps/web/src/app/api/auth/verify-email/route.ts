@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { PrismaClient } from '../../../../../../../prisma/generated/client';
+import { PrismaClient, UserStatus } from '@medsas/database';
 import { z } from 'zod';
 import nodemailer from 'nodemailer';
 
@@ -29,8 +29,6 @@ export async function GET(request: NextRequest) {
       error: 'E-posta doğrulaması yapılırken bir hata oluştu',
       code: 'INTERNAL_SERVER_ERROR'
     }, { status: 500 });
-  } finally {
-    await prisma.$disconnect();
   }
 }
 
@@ -58,8 +56,6 @@ export async function POST(request: Request) {
       error: 'E-posta doğrulaması yapılırken bir hata oluştu',
       code: 'INTERNAL_SERVER_ERROR'
     }, { status: 500 });
-  } finally {
-    await prisma.$disconnect();
   }
 }
 

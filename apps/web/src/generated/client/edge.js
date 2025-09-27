@@ -221,7 +221,7 @@ const config = {
       "value": "prisma-client-js"
     },
     "output": {
-      "value": "C:\\Users\\Code\\Desktop\\medsas\\apps\\web\\src\\generated\\client",
+      "value": "/mnt/c/Users/Code/Desktop/medsas/apps/web/src/generated/client",
       "fromEnvVar": null
     },
     "config": {
@@ -230,17 +230,17 @@ const config = {
     "binaryTargets": [
       {
         "fromEnvVar": null,
-        "value": "windows",
+        "value": "debian-openssl-3.0.x",
         "native": true
       }
     ],
     "previewFeatures": [],
-    "sourceFilePath": "C:\\Users\\Code\\Desktop\\medsas\\apps\\web\\prisma\\schema.prisma",
+    "sourceFilePath": "/mnt/c/Users/Code/Desktop/medsas/apps/web/prisma/schema.prisma",
     "isCustomOutput": true
   },
   "relativeEnvPaths": {
     "rootEnvPath": null,
-    "schemaEnvPath": "../../../.env"
+    "schemaEnvPath": "../../../../../.env"
   },
   "relativePath": "../../../prisma",
   "clientVersion": "5.22.0",

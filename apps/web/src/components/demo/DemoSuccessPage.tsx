@@ -3,7 +3,10 @@
 import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation'; // App Router uses next/navigation
 import Link from 'next/link';
-import { Button, Card, CardBody, Chip, Spinner } from '@heroui/react';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Spinner } from '@/components/ui/spinner';
 import { 
   CheckCircle, 
   Calendar, 
@@ -85,21 +88,21 @@ const DemoSuccessPage: React.FC = () => {
             <strong>Demo kullanım talebiniz alınmıştır!</strong><br />
             En kısa sürede sizlerle iletişime geçeceğiz.
           </p>
-          <Chip color="primary" variant="flat" size="lg" className="text-lg px-4 py-2">
+          <Badge className="bg-blue-100 text-blue-800 px-4 py-2 text-lg font-semibold">
             Talep No: #{demoData?.id}
-          </Chip>
+          </Badge>
         </div>
 
         {/* Next Steps */}
         <Card className="mb-8">
-          <CardBody className="p-8">
+          <CardContent className="p-8">
             <h2 className="text-2xl font-bold text-gray-900 mb-6 text-center">
               Sonraki Adımlar
             </h2>
             
             <div className="grid md:grid-cols-3 gap-6 mb-8">
               <Card className="hover:shadow-lg transition-shadow">
-                <CardBody className="text-center p-6">
+                <CardContent className="text-center p-6">
                   <div className="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-blue-100 mb-4">
                     <Clock className="h-8 w-8 text-blue-600" />
                   </div>
@@ -109,11 +112,11 @@ const DemoSuccessPage: React.FC = () => {
                   <p className="text-gray-600 text-sm">
                     Satış temsilcimiz sizinle iletişime geçecek ve demo randevunuzu planlayacak
                   </p>
-                </CardBody>
+                </CardContent>
               </Card>
 
               <Card className="hover:shadow-lg transition-shadow">
-                <CardBody className="text-center p-6">
+                <CardContent className="text-center p-6">
                   <div className="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-green-100 mb-4">
                     <Calendar className="h-8 w-8 text-green-600" />
                   </div>
@@ -123,11 +126,11 @@ const DemoSuccessPage: React.FC = () => {
                   <p className="text-gray-600 text-sm">
                     Size uygun bir tarihte canlı demo oturumu gerçekleştireceğiz
                   </p>
-                </CardBody>
+                </CardContent>
               </Card>
 
               <Card className="hover:shadow-lg transition-shadow">
-                <CardBody className="text-center p-6">
+                <CardContent className="text-center p-6">
                   <div className="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-purple-100 mb-4">
                     <MessageCircle className="h-8 w-8 text-purple-600" />
                   </div>
@@ -137,13 +140,13 @@ const DemoSuccessPage: React.FC = () => {
                   <p className="text-gray-600 text-sm">
                     Tüm özellikler ve kurumunuza özel çözümler hakkında bilgi alacaksınız
                   </p>
-                </CardBody>
+                </CardContent>
               </Card>
             </div>
 
             {/* Contact Information */}
             <Card>
-              <CardBody className="p-6">
+              <CardContent className="p-6">
                 <h3 className="text-lg font-semibold text-gray-900 mb-4 text-center">
                   Acil Durumlarda Bize Ulaşın
                 </h3>
@@ -171,9 +174,9 @@ const DemoSuccessPage: React.FC = () => {
                     </div>
                   </div>
                 </div>
-              </CardBody>
+              </CardContent>
             </Card>
-          </CardBody>
+          </CardContent>
         </Card>
 
         {/* Features Preview */}
@@ -225,13 +228,14 @@ const DemoSuccessPage: React.FC = () => {
         <div className="text-center space-y-4">
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link href="/">
-              <Button variant="bordered" size="lg">
+              <Button variant="outline" size="lg" className="px-6">
                 Ana Sayfaya Dön
               </Button>
             </Link>
             <Link href="/features">
-              <Button color="primary" size="lg" endContent={<ArrowRight className="h-4 w-4" />}>
+              <Button size="lg" className="px-6">
                 Özellikler Hakkında Daha Fazla Bilgi
+                <ArrowRight className="h-4 w-4" />
               </Button>
             </Link>
           </div>

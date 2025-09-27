@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { PrismaClient } from '../../../../../../prisma/generated/client';
+import { PrismaClient } from '@medsas/database';
 
 export async function GET() {
   try {

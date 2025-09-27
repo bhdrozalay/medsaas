@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { PrismaClient } from '../../../../../../prisma/generated/client';
+import { PrismaClient } from '@medsas/database';
 import { TurkishPhoneUtil } from '@medsas/utils/phone';
 import { z } from 'zod';
 // Rate limiting removed for App Router - will implement differently

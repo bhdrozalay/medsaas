@@ -30,7 +30,7 @@ import {
 // Modal imports
 import UserDetailModal from '../../../../components/modals/UserDetailModal'
 import UserEditModal from '../../../../components/modals/UserEditModal'
-import UserDeleteModal from '../../../../components/modals/UserDeleteModal'
+import { UserDeleteModal } from '../../../../components/modals/UserDeleteModal'
 import { UserApprovalModal } from '../../../../components/modals/UserApprovalModal'
 import UserStatsModal from '../../../../components/modals/UserStatsModal'
 
