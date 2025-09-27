@@ -18,6 +18,9 @@ RUN npm install --only=production && npm cache clean --force
 FROM base AS builder
 WORKDIR /app
 
+# Install OpenSSL
+RUN apk add --no-cache openssl
+
 COPY package*.json ./
 COPY turbo.json ./
 COPY packages/ ./packages/
@@ -28,7 +31,8 @@ RUN npm install
 
 # Prisma generate ve build
 WORKDIR /app/apps/web
-RUN npx prisma generate
+ENV PRISMA_SCHEMA_PATH=/app/apps/web/prisma/schema.prisma
+RUN npx prisma generate --schema=/app/apps/web/prisma/schema.prisma
 RUN npm run build
 
 # Runtime stage
@@ -48,7 +52,7 @@ USER nextjs
 
 EXPOSE 3000
 
-ENV PORT 3000
-ENV HOSTNAME "0.0.0.0"
+ENV PORT=3000
+ENV HOSTNAME="0.0.0.0"
 
 CMD ["node", "server.js"]
