@@ -31,8 +31,8 @@ RUN npm install
 
 # Prisma generate ve build
 WORKDIR /app/apps/web
-ENV PRISMA_SCHEMA_PATH=/app/apps/web/prisma/schema.prisma
-RUN npx prisma generate --schema=/app/apps/web/prisma/schema.prisma
+ENV PRISMA_SCHEMA_PATH=/app/packages/database/prisma/schema.prisma
+RUN npx prisma generate --schema=/app/packages/database/prisma/schema.prisma
 RUN npm run build
 
 # Runtime stage
