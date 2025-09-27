@@ -12,7 +12,7 @@ COPY packages/ ./packages/
 COPY apps/web/package*.json ./apps/web/
 
 # Dependencies yükle
-RUN npm install --only=production && npm cache clean --force
+RUN npm install && npm cache clean --force
 
 # Builder stage
 FROM base AS builder
@@ -45,6 +45,7 @@ RUN adduser --system --uid 1001 nextjs
 
 # Gerekli dosyaları kopyala
 COPY --from=builder /app/apps/web/public ./public
+COPY --from=builder /app/apps/web/src ./src
 COPY --from=builder --chown=nextjs:nodejs /app/apps/web/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/apps/web/.next/static ./.next/static
 

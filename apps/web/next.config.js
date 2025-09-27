@@ -4,6 +4,14 @@ const nextConfig = {
   transpilePackages: ['@medsas/utils'],
   experimental: {
     esmExternals: 'loose'
+  },
+  output: 'standalone',
+  // Include src directory in production build
+  webpack: (config, { isServer }) => {
+    if (!isServer) {
+      config.resolve.fallback = { ...config.resolve.fallback, module: false };
+    }
+    return config;
   }
 };
 
