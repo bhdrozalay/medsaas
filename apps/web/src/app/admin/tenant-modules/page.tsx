@@ -102,7 +102,7 @@ interface TenantModule {
   id: string;
   tenantId: string;
   moduleId: string;
-  status: 'ACTIVE' | 'INACTIVE' | 'TRIAL' | 'EXPIRED';
+  status: 'ACTIVE' | 'INACTIVE' | 'TRIAL' | 'EXPIRED' | 'CANCELLED';
   activatedAt: string;
   expiresAt: string | null;
   module: Module;
