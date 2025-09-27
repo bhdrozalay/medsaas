@@ -12,7 +12,7 @@ COPY packages/ ./packages/
 COPY apps/web/package*.json ./apps/web/
 
 # Dependencies yükle
-RUN npm ci --only=production && npm cache clean --force
+RUN npm install --only=production && npm cache clean --force
 
 # Builder stage
 FROM base AS builder
@@ -24,7 +24,7 @@ COPY packages/ ./packages/
 COPY apps/web/ ./apps/web/
 
 # Build dependencies yükle
-RUN npm ci
+RUN npm install
 
 # Prisma generate ve build
 WORKDIR /app/apps/web
