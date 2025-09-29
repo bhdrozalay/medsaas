@@ -1,20 +1,15 @@
-# Web uygulaması için Dockerfile
+# Next.js standalone Dockerfile for Coolify
 FROM node:20-alpine AS base
 
-# Dependencies stage
+# Install dependencies only when needed
 FROM base AS deps
 WORKDIR /app
 
-# Web app dosyalarını kopyala
+# Install dependencies based on the preferred package manager
 COPY package*.json ./
-COPY ../../turbo.json ./
-COPY ../../packages/ ./packages/
-COPY package*.json ./apps/web/
+RUN npm ci --only=production
 
-# Dependencies yükle
-RUN npm install && npm cache clean --force
-
-# Builder stage
+# Rebuild the source code only when needed
 FROM base AS builder
 WORKDIR /app
 
@@ -22,32 +17,31 @@ WORKDIR /app
 RUN apk add --no-cache openssl
 
 COPY package*.json ./
-COPY ../../turbo.json ./
-COPY ../../packages/ ./packages/
-COPY . ./apps/web/
+RUN npm ci
 
-# Build dependencies yükle
-RUN npm install
+# Copy source files
+COPY . .
 
-# Prisma generate ve build
-WORKDIR /app/apps/web
-ENV PRISMA_SCHEMA_PATH=/app/packages/database/prisma/schema.prisma
-RUN npx prisma generate --schema=/app/packages/database/prisma/schema.prisma
+# Generate Prisma client if schema exists
+RUN if [ -f "prisma/schema.prisma" ]; then npx prisma generate; fi
+
+# Build the application
 RUN npm run build
 
-# Runtime stage
+# Production image, copy all the files and run next
 FROM base AS runner
 WORKDIR /app
 
-# Non-root kullanıcı oluştur
+ENV NODE_ENV=production
+
+# Create nextjs user
 RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nextjs
 
-# Gerekli dosyaları kopyala
-COPY --from=builder /app/apps/web/public ./public
-COPY --from=builder /app/apps/web/src ./src
-COPY --from=builder --chown=nextjs:nodejs /app/apps/web/.next/standalone ./
-COPY --from=builder --chown=nextjs:nodejs /app/apps/web/.next/static ./.next/static
+# Copy built application
+COPY --from=builder /app/public ./public
+COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
+COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 
 USER nextjs
 
