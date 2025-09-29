@@ -7,7 +7,7 @@ WORKDIR /app
 
 # Install dependencies based on the preferred package manager
 COPY package*.json ./
-RUN npm ci --only=production
+RUN npm install --only=production
 
 # Rebuild the source code only when needed
 FROM base AS builder
@@ -17,7 +17,7 @@ WORKDIR /app
 RUN apk add --no-cache openssl
 
 COPY package*.json ./
-RUN npm ci
+RUN npm install
 
 # Copy source files
 COPY . .
