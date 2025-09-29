@@ -5,11 +5,11 @@ FROM node:20-alpine AS base
 FROM base AS deps
 WORKDIR /app
 
-# Monorepo için gerekli dosyaları kopyala
+# Web app dosyalarını kopyala
 COPY package*.json ./
-COPY turbo.json ./
-COPY packages/ ./packages/
-COPY apps/web/package*.json ./apps/web/
+COPY ../../turbo.json ./
+COPY ../../packages/ ./packages/
+COPY package*.json ./apps/web/
 
 # Dependencies yükle
 RUN npm install && npm cache clean --force
@@ -22,9 +22,9 @@ WORKDIR /app
 RUN apk add --no-cache openssl
 
 COPY package*.json ./
-COPY turbo.json ./
-COPY packages/ ./packages/
-COPY apps/web/ ./apps/web/
+COPY ../../turbo.json ./
+COPY ../../packages/ ./packages/
+COPY . ./apps/web/
 
 # Build dependencies yükle
 RUN npm install
